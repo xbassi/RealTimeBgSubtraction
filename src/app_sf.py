@@ -25,7 +25,7 @@ class DeepLabModel(object):
 
   INPUT_TENSOR_NAME = 'ImageTensor:0'
   OUTPUT_TENSOR_NAME = 'SemanticPredictions:0'
-  INPUT_SIZE = 513
+  INPUT_SIZE = 256
   FROZEN_GRAPH_NAME = 'frozen_inference_graph'
 
   def __init__(self, tarball_path):
@@ -64,22 +64,45 @@ class DeepLabModel(object):
 
 
 def drawSegment(baseImg, matImg, count, shape):
-    width, height = baseImg.size
+    # width, height = baseImg.size
+
+    mask = np.array(matImg)
+    # mask = mask[:, :, ::-1].copy() 
+
+    aimg = np.array(baseImg)
+    # aimg = aimg[:, :, ::-1].copy() 
+
+    # mask_inv = cv2.bitwise_not(mask)
+
+    # aimg = cv2.bitwise_and(aimg,aimg,mask_inv)
+    # aimg = cv2.cvtColor(aimg,cv2.COLOR_BGR2RGB)
+
+    # mask = np.invert(mask.astype(np.uint8))
+    mask = 1 - mask
+    mask[mask == 1] = 255
+    # print(mask)
+
+    aimg[:,:,0] = np.where(mask>0,mask[:,:],aimg[:,:,0])
+    aimg[:,:,1] = np.where(mask>0,mask[:,:],aimg[:,:,1])
+    aimg[:,:,2] = np.where(mask>0,mask[:,:],aimg[:,:,2])
+
+    # dummyImg = np.clip(aimg, 0, 255).astype(np.uint8)
+
     # print("Hereeee")
-    dummyImg = np.zeros([height, width, 4], dtype=np.uint8)
-    for x in range(width):
-              for y in range(height):
-                  color = matImg[y,x]
-                  (r,g,b) = baseImg.getpixel((x,y))
-                  if color == 0:
-                      dummyImg[y,x,3] = 255
-                      dummyImg[y,x,2] = 255
-                      dummyImg[y,x,1] = 255
-                      dummyImg[y,x,0] = 255
-                  else :
-                      dummyImg[y,x] = [r,g,b,255]
-    img = Image.fromarray(dummyImg)
-    img = img.convert("RGB")
+    # dummyImg = np.zeros([height, width, 4], dtype=np.uint8)
+    # for x in range(width):
+    #           for y in range(height):
+    #               color = matImg[y,x]
+    #               (r,g,b) = baseImg.getpixel((x,y))
+    #               if color == 0:
+    #                   dummyImg[y,x,3] = 255
+    #                   dummyImg[y,x,2] = 255
+    #                   dummyImg[y,x,1] = 255
+    #                   dummyImg[y,x,0] = 255
+    #               else :
+    #                   dummyImg[y,x] = [r,g,b,255]
+    img = Image.fromarray(aimg)
+    # img = img.convert("RGB")
     #img = img.resize((shape[0], shape[1]), Image.ANTIALIAS) 
     #img.save(outputFilePath+str(count).zfill(8)+'.jpg')
     return img
@@ -139,26 +162,36 @@ def gen():
     count = 0
     camera = cv2.VideoCapture('./data/small.mp4')
 
+    offset = 12
+    seg_map = None
+    save_frame = None
+    save_size = None
+
     while True:
         # frame = camera.get_frame()
         ret, frame = camera.read()
+        # frame = cv2.resize(frame,(256,256))
+
         if ret != None:
 
-          # frame = np.asarray(bytearray(frame), dtype='uint8')
-          # frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
-          #print(frame.shape)
           jpeg_str = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
           jpeg_str = rotate_image(jpeg_str, -90)
           shape = jpeg_str.shape
           orignal_im = Image.fromarray(jpeg_str)
-          resized_im, seg_map = MODEL.run(orignal_im)
-          ret_frame = drawSegment(resized_im, seg_map, count, shape)
+
+          if count % offset == 0:
+
+            orignal_im, seg_map = MODEL.run(orignal_im)
+            save_size = orignal_im.size
+            
+          ret_frame = drawSegment(orignal_im.resize(save_size), seg_map, count, shape)
           ret_frame = np.array(ret_frame) 
           ret_frame = ret_frame[:, :, ::-1].copy()
           ret_frame = cv2.imencode('.jpg', ret_frame)[1].tobytes() 
           frame = ret_frame
-          count = count + 1
+
           print(count)
+          count = count + 1
 
 
 
