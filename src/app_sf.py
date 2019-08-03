@@ -13,6 +13,7 @@ import tensorflow as tf
 import sys
 import datetime
 import cv2
+import time
 
 # from tensorflow.contrib.lite.python import interpreter as interpreter_wrapper
 
@@ -41,7 +42,10 @@ class DeepLabModel(object):
     with self.graph.as_default():
       tf.import_graph_def(graph_def, name='')
 
-    self.sess = tf.Session(graph=self.graph)
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = False
+    config.gpu_options.per_process_gpu_memory_fraction = 0.4
+    self.sess = tf.Session(config=config, graph=self.graph)
 
   def run(self, image):
     start = datetime.datetime.now()
@@ -160,27 +164,27 @@ def stream():
 
 def gen():
     count = 0
-    camera = cv2.VideoCapture('./data/small.mp4')
+    camera = cv2.VideoCapture(0)
 
-    offset = 12
+    offset = 4
     seg_map = None
-    save_frame = None
     save_size = None
-
     while True:
+        flag = 0
         # frame = camera.get_frame()
+        start = time.time()
         ret, frame = camera.read()
         # frame = cv2.resize(frame,(256,256))
 
         if ret != None:
 
           jpeg_str = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-          jpeg_str = rotate_image(jpeg_str, -90)
+          # jpeg_str = rotate_image(jpeg_str, -90)
           shape = jpeg_str.shape
           orignal_im = Image.fromarray(jpeg_str)
 
           if count % offset == 0:
-
+            flag = 1
             orignal_im, seg_map = MODEL.run(orignal_im)
             save_size = orignal_im.size
             
@@ -190,10 +194,13 @@ def gen():
           ret_frame = cv2.imencode('.jpg', ret_frame)[1].tobytes() 
           frame = ret_frame
 
-          print(count)
+          # print(count)
           count = count + 1
 
-
+          end  = time.time()
+          
+          if count % offset != 0 and flag == 1:
+            print(1 / (end - start))
 
           yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -214,8 +221,5 @@ if __name__ == '__main__':
     # interpreter = interpreter_wrapper.Interpreter(model_path=model_file)
     # interpreter.allocate_tensors()
     
-
-
-
 
     app.run(host='0.0.0.0', debug=True)
