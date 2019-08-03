@@ -130,6 +130,10 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/stream')
+def stream():
+    return render_template('video.html')
+
 
 def gen():
     count = 0
