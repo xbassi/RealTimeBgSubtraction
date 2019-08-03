@@ -10,6 +10,12 @@ Camera.set_video_source("../data/s.mp4")
 def index():
     return render_template('index.html')
 
+
+@app.route('/stream')
+def stream():
+    return render_template('video.html')
+
+
 def gen(camera):
     while True:
         frame = camera.get_frame()
