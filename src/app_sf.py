@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 
-##Deep
-
 import os
 from io import BytesIO
 
@@ -14,9 +12,6 @@ import sys
 import datetime
 import cv2
 import time
-
-
-# from tensorflow.contrib.lite.python import interpreter as interpreter_wrapper
 
 
 
