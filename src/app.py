@@ -13,9 +13,7 @@ import tensorflow as tf
 import sys
 import datetime
 import cv2
-
-from tensorflow.contrib.lite.python import interpreter as interpreter_wrapper
-
+import time
 
 
 ##
@@ -25,7 +23,7 @@ class DeepLabModel(object):
 
   INPUT_TENSOR_NAME = 'ImageTensor:0'
   OUTPUT_TENSOR_NAME = 'SemanticPredictions:0'
-  INPUT_SIZE = 513
+  INPUT_SIZE = 256
   FROZEN_GRAPH_NAME = 'frozen_inference_graph'
 
   def __init__(self, tarball_path):
@@ -65,6 +63,7 @@ class DeepLabModel(object):
 
 def drawSegment(baseImg, matImg, count, shape):
     width, height = baseImg.size
+
     # print("Hereeee")
     dummyImg = np.zeros([height, width, 4], dtype=np.uint8)
     for x in range(width):
@@ -131,11 +130,12 @@ def index():
     return render_template('index.html')
 
 def gen():
-    count = 0
-    camera = cv2.VideoCapture('./data/small.mp4')
+    count = 1
+    camera = cv2.VideoCapture('./data/green.mp4')
 
     while True:
         # frame = camera.get_frame()
+        start = time.time()
         ret, frame = camera.read()
         if ret != None:
 
@@ -143,7 +143,9 @@ def gen():
           # frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
           #print(frame.shape)
           jpeg_str = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-          jpeg_str = rotate_image(jpeg_str, -90)
+          # jpeg_str = rotate_image(jpeg_str, -90)
+          jpeg_str = rotate_image(jpeg_str, 0)
+          
           shape = jpeg_str.shape
           orignal_im = Image.fromarray(jpeg_str)
           resized_im, seg_map = MODEL.run(orignal_im)
@@ -153,7 +155,8 @@ def gen():
           ret_frame = cv2.imencode('.jpg', ret_frame)[1].tobytes() 
           frame = ret_frame
           count = count + 1
-          print(count)
+          end  = time.time()
+          print(1 / (end - start))
 
 
 
@@ -167,15 +170,15 @@ def video_feed():
 
 if __name__ == '__main__':
 
-    modelType = "mobile_net_model"
+    modelType = "mobile_net_model_2"
     if len(sys.argv) > 3 and sys.argv[3] == "1":
       modelType = "xception_model"
 
     MODEL = DeepLabModel(modelType)
-    model_file = "/home/prince/Downloads/deeplabv3_257_mv_gpu.tflite"
-    interpreter = interpreter_wrapper.Interpreter(model_path=model_file)
-    interpreter.allocate_tensors()
-    
+    # model_file = "/home/prince/Downloads/deeplabv3_257_mv_gpu.tflite"
+    # interpreter = tf.contrib.lite.Interpreter(model_path=model_file)
+    # interpreter.allocate_tensors()
+
 
 
 
