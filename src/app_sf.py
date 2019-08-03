@@ -45,7 +45,7 @@ class DeepLabModel(object):
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = False
-    config.gpu_options.per_process_gpu_memory_fraction = 0.4
+    config.gpu_options.per_process_gpu_memory_fraction = 0.9
     self.sess = tf.Session(config=config, graph=self.graph)
 
   def run(self, image):
@@ -308,7 +308,7 @@ def video_feed():
 
 if __name__ == '__main__':
 
-    modelType = "mobile_net_model"
+    modelType = "mobile_net_model_2"
     if len(sys.argv) > 3 and sys.argv[3] == "1":
       modelType = "xception_model"
 
