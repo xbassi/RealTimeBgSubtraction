@@ -14,6 +14,10 @@ import sys
 import datetime
 import cv2
 
+from tensorflow.contrib.lite.python import interpreter as interpreter_wrapper
+
+
+
 ##
 
 class DeepLabModel(object):
@@ -54,14 +58,14 @@ class DeepLabModel(object):
     end = datetime.datetime.now()
 
     diff = end - start
-    print("Time taken to evaluate segmentation is : " + str(diff))
+    # print("Time taken to evaluate segmentation is : " + str(diff))
 
     return resized_image, seg_map
 
 
 def drawSegment(baseImg, matImg, count, shape):
     width, height = baseImg.size
-    print("Hereeee")
+    # print("Hereeee")
     dummyImg = np.zeros([height, width, 4], dtype=np.uint8)
     for x in range(width):
               for y in range(height):
@@ -88,7 +92,7 @@ def rotate_image(mat, angle):
 
     height, width = mat.shape[:2] # image shape has 3 dimensions
     image_center = (width/2, height/2) # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
-    print(height,width)
+    # print(height,width)
 
     rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.)
 
@@ -98,7 +102,7 @@ def rotate_image(mat, angle):
     # find the new width and height bounds
     bound_w = int(height * abs_sin + width * abs_cos)
     bound_h = int(height * abs_cos + width * abs_sin)
-    print(bound_w, bound_h)
+    # print(bound_w, bound_h)
 
     # subtract old image center (bringing image back to origo) and adding the new image center coordinates
     rotation_mat[0, 2] += bound_w/2 - image_center[0]
@@ -115,30 +119,28 @@ def rotate_image(mat, angle):
 
 
 from flask import Flask, render_template, Response
-from camera_opencv import Camera
+# from camera_opencv import Camera
 
 app = Flask(__name__)
 
-Camera.set_video_source("./data/small.mp4")
 
-modelType = "mobile_net_model"
-if len(sys.argv) > 3 and sys.argv[3] == "1":
-  modelType = "xception_model"
-
-MODEL = DeepLabModel(modelType)
+# Camera.set_video_source("./data/small.mp4")
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-def gen(camera):
-    while True:
-        count = 0
-        frame = camera.get_frame()
-        if frame != None:
+def gen():
+    count = 0
+    camera = cv2.VideoCapture('./data/small.mp4')
 
-          frame = np.asarray(bytearray(frame), dtype='uint8')
-          frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
+    while True:
+        # frame = camera.get_frame()
+        ret, frame = camera.read()
+        if ret != None:
+
+          # frame = np.asarray(bytearray(frame), dtype='uint8')
+          # frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
           #print(frame.shape)
           jpeg_str = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
           jpeg_str = rotate_image(jpeg_str, -90)
@@ -151,16 +153,31 @@ def gen(camera):
           ret_frame = cv2.imencode('.jpg', ret_frame)[1].tobytes() 
           frame = ret_frame
           count = count + 1
+          print(count)
 
 
 
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+          yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen(Camera()),
+    return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
+
+    modelType = "mobile_net_model"
+    if len(sys.argv) > 3 and sys.argv[3] == "1":
+      modelType = "xception_model"
+
+    MODEL = DeepLabModel(modelType)
+    model_file = "/home/prince/Downloads/deeplabv3_257_mv_gpu.tflite"
+    interpreter = interpreter_wrapper.Interpreter(model_path=model_file)
+    interpreter.allocate_tensors()
+    
+
+
+
+
     app.run(host='0.0.0.0', debug=True)
