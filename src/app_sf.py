@@ -198,32 +198,13 @@ def gen():
           #the following part is just taking out the background which is also considered a component, but most of the time we don't want that.
           sizes = stats[1:, -1]; nb_components = nb_components - 1
 
-          # minimum size of particles we want to keep (number of pixels)
-          # here, it's a fixed value, but you can set it as you want, eg the mean of the sizes or whatever
-          # min_size = 300  
+          if len(sizes) != 0:
 
-          #your answer image
-          seg_map = np.zeros((output.shape))
+            seg_map = np.zeros((output.shape))
+            max_e = sizes.tolist().index(max(sizes.tolist()))
+            seg_map[output == max_e + 1] = 255
 
-          max_e = sizes.tolist().index(max(sizes.tolist()))
-
-          seg_map[output == max_e + 1] = 255
-
-          #for every component in the image, you keep it only if it's above min_size
-          # for i in range(0, nb_components):
-          #     if sizes[i] >= min_size:
-          #         seg_map[output == i + 1] = 255
-
-          # seg_map_cv2 = np.array(seg_map).astype(np.uint8)          
-          # seg_map = Image.fromarray(seg_map)
-          # seg_map = (seg_map.filter(ImageFilter.MinFilter(3)))
-
-
-          seg_map_cv2 = np.array(seg_map).astype(np.float32)
-
-
-
-          # seg_map_cv2 = cv2.dilate(seg_map_cv2, kernel, iterations=1)
+          # seg_map_cv2 = np.array(seg_map).astype(np.float32)
 
           ret_frame = drawSegment(orignal_im.resize(save_size), seg_map, count, shape)
           ret_frame = np.array(ret_frame) 
