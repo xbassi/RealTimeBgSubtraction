@@ -11,8 +11,10 @@ import numpy as np
 import os 
 from collections import OrderedDict
 import torch.nn.functional as F
+import sys
 
-# import sys
+np.set_printoptions(threshold=sys.maxsize)
+
 # sys.path.insert(0, './matting/pre_trained/erd_seg_matting/model/')
 
 # parser = argparse.ArgumentParser(description='human matting')
@@ -99,15 +101,47 @@ def seg_process(args, image, net):
     # gray
     bg = image
     # bg_alpha = 1 - fg_alpha[..., np.newaxis]
-    bg_alpha = fg_alpha[..., np.newaxis]
-    
-    split =  0.05
+    bg_alpha = fg_alpha
 
+
+    split =  0
     bg_alpha[bg_alpha <= split] = 0
+    bg_alpha[bg_alpha > split] = 255
+
+    bg_alpha[bg_alpha == 255] = 1
+
+    bg_alpha = 1 - bg_alpha
+
+    
+
+    bg_alpha = np.array(bg_alpha).astype(np.uint8)
+    nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(bg_alpha, connectivity=4)
+    sizes = stats[1:, -1]; nb_components = nb_components - 1
+    # print(sizes)
+    if len(sizes) != 0:
+
+        bg_alpha = np.zeros((output.shape))
+        max_e = sizes.tolist().index(max(sizes.tolist()))
+        bg_alpha[output == max_e + 1] = 255
+
+    bg_alpha = 1 - bg_alpha
+    bg_alpha[bg_alpha == 1] = 255
+
+    # unique, counts = np.unique(bg_alpha, return_counts=True)
+    # print(np.asarray((unique, counts)).T)
+
+    # print(bg_alpha)
+    # exit()
+
+    # bg_alpha = fg_alpha[..., np.newaxis]
+    
+    # split =  0
+
+    # bg_alpha[bg_alpha <= split] = 0
 
     # print(bg_alpha)
 
-    bg_alpha[bg_alpha > split] = 255
+    # bg_alpha[bg_alpha > split] = 255
 
     
 
@@ -120,20 +154,8 @@ def seg_process(args, image, net):
     
     # -----------------------------------------------------------------
     # fg : color, bg : gray
-    bg_alpha = np.squeeze(bg_alpha)
-    # print(fg.shape)    
-
-    # bg_alpha = np.array(bg_alpha).astype(np.uint8)
-
-    # nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(bg_alpha, connectivity=4)
-    # sizes = stats[1:, -1]; nb_components = nb_components - 1
-    # print(sizes)
-    # if len(sizes) != 0:
-
-    #     bg_alpha = np.zeros((output.shape))
-    #     max_e = sizes.tolist().index(max(sizes.tolist()))
-    #     bg_alpha[output == max_e + 1] = 255
-
+    # bg_alpha = np.squeeze(bg_alpha)
+    
 
     bg[:,:,0] = np.where(bg_alpha>0,bg_alpha,bg[:,:,0])
     bg[:,:,1] = np.where(bg_alpha>0,bg_alpha,bg[:,:,1])
