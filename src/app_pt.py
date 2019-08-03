@@ -83,7 +83,7 @@ def stream():
 
 def gen():
     count = 0
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture("./data/green2.mp4")
 
     offset = 1
     seg_map = None
@@ -96,17 +96,17 @@ def gen():
         ret, frame = camera.read()
         # frame = cv2.resize(frame,(256,256))
 
-        if ret != None:
 
+        if ret != None:
           frame = cv2.flip(frame,1)
           # jpeg_str = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
           # jpeg_str = rotate_image(jpeg_str, -90)
           # shape = jpeg_str.shape
           # orignal_im = Image.fromarray(jpeg_str)
 
-          if count % offset == 0:
-            flag = 1
-            frame = camera_input.seg_process(args, frame, model)
+          # if count % offset == 0:
+          flag = 1
+          frame = camera_input.seg_process(args, frame, model)
             # save_size = orignal_im.size
           
 
@@ -136,8 +136,8 @@ def gen():
 
           end  = time.time()
           
-          if count % offset != 0 and flag == 1:
-            print(1 / (end - start), end = "\r")
+          # if count % offset != 0 and flag == 1:
+          print(1 / (end - start))
 
           yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')

@@ -80,12 +80,12 @@ def seg_process(args, image, net):
 
     seg, alpha = net(inputs)
 
-    print((time.time() - t0))  
+    # print((time.time() - t0))  
 
     if args.without_gpu:
         alpha_np = seg[0,0,:,:].cpu().data.numpy()
     else:
-        alpha_np = seg[0,0,:,:].data.numpy()
+        alpha_np = seg[0,0,:,:].data.cpu().numpy()
 
 
     fg_alpha = cv2.resize(alpha_np, (origin_w, origin_h), interpolation=cv2.INTER_CUBIC)
@@ -101,7 +101,7 @@ def seg_process(args, image, net):
     # bg_alpha = 1 - fg_alpha[..., np.newaxis]
     bg_alpha = fg_alpha[..., np.newaxis]
     
-    split =  0
+    split =  0.05
 
     bg_alpha[bg_alpha <= split] = 0
 
