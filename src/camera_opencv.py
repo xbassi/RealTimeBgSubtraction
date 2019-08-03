@@ -15,13 +15,17 @@ class Camera(BaseCamera):
         if not camera.isOpened():
             raise RuntimeError('Could not start camera.')
 
+        count = 0
         while True:
         # read current frame
             _, img = camera.read()
+            print("Sending at " + str(count))
+            count = count + 1
 
             if img is None:
-                print('Video Complete')
+                print("Video Complete")
                 break
 
-        # encode as a jpeg image and return it
-        yield cv2.imencode('.jpg', img)[1].tobytes()
+            # encode as a jpeg image and return it
+            # yield cv2.imencode('.jpg', img)[1].tobytes()
+
