@@ -40,7 +40,7 @@ class DeepLabModel(object):
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = False
-    config.gpu_options.per_process_gpu_memory_fraction = 0.4
+    config.gpu_options.per_process_gpu_memory_fraction = 0.9
     self.sess = tf.Session(config=config, graph=self.graph)
 
   def run(self, image):
@@ -106,6 +106,65 @@ def drawSegment(baseImg, matImg, count, shape):
     #img = img.resize((shape[0], shape[1]), Image.ANTIALIAS) 
     #img.save(outputFilePath+str(count).zfill(8)+'.jpg')
     return img
+
+
+
+class DeepLabModel_TF(object):
+
+  model_file = "/home/prince/SkillEnza/Unacademy/RealTimeBgSubtraction/mobile_net_model_3/frozen_inference_graph.tflite"
+  # model_file = "/home/prince/Downloads/deeplabv3_257_mv_gpu.tflite"
+  
+  input_mean = 127.5
+  input_std = 127.5
+  floating_model = False
+  input_details = None
+  output_details = None
+  interpreter = None
+    
+
+  def __init__(self):
+
+    self.interpreter = tf.lite.Interpreter(model_path=self.model_file)
+    self.interpreter.allocate_tensors()
+
+    self.input_details = self.interpreter.get_input_details()
+    self.output_details = self.interpreter.get_output_details()
+    # check the type of the input tensor
+    if self.input_details[0]['dtype'] == type(np.float32(1.0)):
+      self.floating_model = False
+
+  def run(self, image):
+    # NxHxWxC, H:1, W:2
+    height = self.input_details[0]['shape'][1]
+    width = self.input_details[0]['shape'][2]
+    # img = Image.open(image)
+    img = image.resize((width, height))
+
+    # add N dim
+    input_data = np.expand_dims(img, axis=0)
+
+    if self.floating_model:
+      input_data = (np.float32(input_data) - self.input_mean) / self.input_std
+
+    self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
+    self.interpreter.invoke()
+    output_data = self.interpreter.get_tensor(self.output_details[0]['index'])
+    results = np.squeeze(output_data)
+    return img, results
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def rotate_image(mat, angle):
@@ -225,14 +284,12 @@ def video_feed():
 
 if __name__ == '__main__':
 
-    modelType = "mobile_net_model"
+    modelType = "mobile_net_model_2"
     if len(sys.argv) > 3 and sys.argv[3] == "1":
       modelType = "xception_model"
 
     MODEL = DeepLabModel(modelType)
-    # model_file = "/home/prince/Downloads/deeplabv3_257_mv_gpu.tflite"
-    # interpreter = interpreter_wrapper.Interpreter(model_path=model_file)
-    # interpreter.allocate_tensors()
-    
+    # MODEL = DeepLabModel_TF()
 
+    
     app.run(host='0.0.0.0', debug=True)

@@ -1,7 +1,4 @@
-'''
-Author  : Zhengwei Li
-Version : 1.0.0 
-'''
+
 import time
 import cv2
 import torch 
@@ -90,7 +87,7 @@ def seg_process(args, image, net):
     if args.without_gpu:
         alpha_np = seg[0,0,:,:].cpu().data.numpy()
     else:
-        alpha_np = seg[0,0,:,:].data.numpy()
+        alpha_np = seg[0,0,:,:].data.cpu().numpy()
 
 
     fg_alpha = cv2.resize(alpha_np, (origin_w, origin_h), interpolation=cv2.INTER_CUBIC)
