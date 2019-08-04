@@ -1,22 +1,26 @@
 # BOOTSTRAP PARADOX BACKGROUND REMOVAL
 
-Done for the Hackathon
+TEAMNAME - IIITDM
+TRACK - UNACADEMY
 
-## REFER Background Subtraction.pdf for ALGO INFO and APPROACH
+### Refer Background Subtraction.pdf for algorithms and approach
 
 ### Prerequisites and setup
 
-Refer requirements.txt for Linux
+Refer requirements.txt for Linux/Ubuntu
 
 1. python3.6
 2. pip3
-3. 
 ```
 pip3 install -r requirements.txt
 
 ```
 
+### Quick run for Camera live feed
+python3.6 src/app_pt.py --file camera
 
+### Quick run for video file path
+python3.6 src/app_pt.py --file file_path
 
 ### Digital Ocean Hosted Service for Video Camera   
 
