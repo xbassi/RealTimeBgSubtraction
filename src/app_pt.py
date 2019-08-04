@@ -83,7 +83,10 @@ def stream():
 
 def gen():
     count = 0
-    camera = cv2.VideoCapture("./data/green2.mp4")
+    # camera = cv2.VideoCapture("./data/green2.mp4")
+    # camera = cv2.VideoCapture("./data/green.mp4")
+    camera = cv2.VideoCapture(0)
+
 
     offset = 1
     seg_map = None
@@ -97,7 +100,7 @@ def gen():
         # frame = cv2.resize(frame,(256,256))
 
 
-        if ret != None:
+        if frame is not None:
           frame = cv2.flip(frame,1)
           # jpeg_str = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
           # jpeg_str = rotate_image(jpeg_str, -90)
@@ -141,6 +144,9 @@ def gen():
 
           yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        else:
+          print('Video Completed')
+          break          
 
 @app.route('/video_feed')
 def video_feed():
