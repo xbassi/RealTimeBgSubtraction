@@ -184,7 +184,7 @@ def seg_process(args, image, net):
     out[out>255] = 255
 
     out = out.astype(np.uint8)
-
+ 
     return out
 
 

@@ -1,0 +1,20 @@
+# BOOTSTRAP PARADOX BACKGROUND REMOVAL
+
+Done for the Hackathon
+
+##REFER Background Subtraction.pdf for ALGO INFO and APPROACH
+
+### Prerequisites and setup
+
+Refer requirements.txt
+
+```
+pip3 install -r requirements.txt
+
+```
+
+### Digital Ocean Hosted Service for Video Camera   
+
+
+
+
