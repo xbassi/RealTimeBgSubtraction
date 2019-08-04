@@ -91,9 +91,9 @@ def fps():
 
 def gen():
     count = 0
-    # camera = cv2.VideoCapture("./data/green2.mp4")
+    camera = cv2.VideoCapture("./data/green2.mp4")
     # camera = cv2.VideoCapture("./data/green.mp4")
-    camera = cv2.VideoCapture(0)
+    # camera = cv2.VideoCapture(0)
 
 
     offset = 1

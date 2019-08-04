@@ -21,7 +21,7 @@ np.set_printoptions(threshold=sys.maxsize)
 # args = parser.parse_args()
 
 torch.set_grad_enabled(False)
-INPUT_SIZE = 512
+INPUT_SIZE = 384
 
     
 #################################
