@@ -67,7 +67,10 @@ def rotate_image(mat, angle):
 from flask import Flask, render_template, Response
 # from camera_opencv import Camera
 
+
+
 app = Flask(__name__)
+
 
 
 # Camera.set_video_source("./data/small.mp4")
@@ -79,6 +82,11 @@ def index():
 @app.route('/stream')
 def stream():
     return render_template('video.html')
+
+
+@app.route('/fps')
+def fps():
+    return str(int(FPS))
 
 
 def gen():
@@ -104,9 +112,9 @@ def gen():
           # shape = jpeg_str.shape
           # orignal_im = Image.fromarray(jpeg_str)
 
-          if count % offset == 0:
-            flag = 1
-            frame = camera_input.seg_process(args, frame, model)
+          # if count % offset == 0:
+          #   flag = 1
+          frame = camera_input.seg_process(args, frame, model)
             # save_size = orignal_im.size
           
 
@@ -136,8 +144,10 @@ def gen():
 
           end  = time.time()
           
-          if count % offset != 0 and flag == 1:
-            print(1 / (end - start), end = "\r")
+          global FPS
+
+          FPS = 1 / (end - start)
+          print(FPS, end = "\r")
 
           yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -149,10 +159,11 @@ def video_feed():
 
 if __name__ == '__main__':
 
+    FPS = -1
 
     # model_file = "/home/prince/Downloads/deeplabv3_257_mv_gpu.tflite"
     # interpreter = interpreter_wrapper.Interpreter(model_path=model_file)
     # interpreter.allocate_tensors()
     
-
     app.run(host='0.0.0.0', debug=True)
+

@@ -82,7 +82,7 @@ def seg_process(args, image, net):
 
     seg, alpha = net(inputs)
 
-    print((time.time() - t0))  
+    # print((time.time() - t0))  
 
     if args.without_gpu:
         alpha_np = seg[0,0,:,:].cpu().data.numpy()
