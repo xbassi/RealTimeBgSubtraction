@@ -24,6 +24,9 @@ python3.6 src/app_pt.py --file file_path
 
 ### Digital Ocean Hosted Service for Video Camera   
 
+### Live Stream Link (Digital Ocean)
+
+http://165.22.219.154:5000/stream (slower due to no GPU availability)
 
 
 
