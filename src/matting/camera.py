@@ -1,7 +1,4 @@
-'''
-Author  : Zhengwei Li
-Version : 1.0.0 
-'''
+
 import time
 import cv2
 import torch 
@@ -36,6 +33,9 @@ INPUT_SIZE = 384
 device = None
 
 flag = None
+
+mask_queue = None
+counter = 0
 
 if torch.cuda.is_available():
     flag = 1
@@ -124,8 +124,22 @@ def seg_process(args, image, net):
         max_e = sizes.tolist().index(max(sizes.tolist()))
         bg_alpha[output == max_e + 1] = 255
 
+    
+
+    global mask_queue
+    global counter
+
+    if (mask_queue is None) or counter != 6:
+        mask_queue = bg_alpha
+        counter = 0
+    else:
+        bg_alpha = mask_queue * bg_alpha
+        counter += 1
+
+
+    
     bg_alpha = 1 - bg_alpha
-    bg_alpha[bg_alpha == 1] = 255
+    bg_alpha[bg_alpha == 1] = 255    
 
     # unique, counts = np.unique(bg_alpha, return_counts=True)
     # print(np.asarray((unique, counts)).T)
