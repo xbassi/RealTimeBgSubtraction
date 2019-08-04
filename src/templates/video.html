@@ -5,5 +5,21 @@
   <body>
     <h1>Video Streaming</h1>
     <img src="{{ url_for('video_feed') }}">
+    FPS:<p id="fps"></p>
   </body>
+  <script type="text/javascript">
+  	
+  	setInterval(function(){ 
+  		var xhr = new XMLHttpRequest();
+		xhr.open('GET', "{{ url_for('fps') }}");
+		xhr.onload = function() {
+		    if (xhr.status === 200) {
+		    	document.getElementById('fps').innerHTML = xhr.responseText
+		      
+		    }
+		};
+		xhr.send();
+  	}, 1000);
+
+  </script>
 </html>
