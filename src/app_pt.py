@@ -23,6 +23,8 @@ import argparse
 parser = argparse.ArgumentParser(description='human matting')
 parser.add_argument('--model', default='./src/matting/pre_trained/erd_seg_matting/model/model_obj.pth', help='preTrained model')
 parser.add_argument('--without_gpu', action='store_true', default=False, help='use cpu')
+parser.add_argument('--file', default='Camera', help='preTrained model')
+
 
 args = parser.parse_args()
 
@@ -91,7 +93,15 @@ def fps():
 
 def gen():
     count = 0
-    camera = cv2.VideoCapture("./data/green2.mp4")
+    camera = None
+    if args.file == 'Camera':
+      camera = cv2.VideoCapture(0)
+    else:
+      camera = cv2.VideoCapture(args.file)
+
+
+
+    # camera = cv2.VideoCapture("./data/green2.mp4")
     # camera = cv2.VideoCapture("./data/green.mp4")
     # camera = cv2.VideoCapture(0)
 
