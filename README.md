@@ -22,11 +22,14 @@ python3.6 src/app_pt.py --file camera
 ### Quick run for video file path
 python3.6 src/app_pt.py --file file_path
 
+### Open Web Browser
+go to link http://localhost:5000 to see the video feed
+
 ### Digital Ocean Hosted Service for Video Camera   
 
-### Live Stream Link (Digital Ocean)
+<!-- ### Live Stream Link (Digital Ocean)
 
 http://165.22.219.154:5000/stream (slower due to no GPU availability)
-
+ -->
 
 
